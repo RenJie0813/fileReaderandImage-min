@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="format-detection" content="email=no" />
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="Cache" content="no-cache">
+    <title>图片压缩并且修正IOS端方向错位</title>
+    <link rel="stylesheet" href="css/public.css">
+    <link rel="stylesheet" href="css/patient_info.css">
+    <script src="jquery-1.12.4.js"></script>
+    <script src="exif.js"></script>
+    <script src="IOS.js"></script>
+    <script src="minIMG.js"></script>
+    <style>
+        .imgGroup {
+            width: 50px;
+            height: 50px;
+            border: 1px solid #333;
+        }
+        
+        .showImg {
+            width: 0;
+            height: 0;
+            background: #333;
+            overflow: scroll;
+            ;
+            position: relative;
+        }
+        
+        .showImg img {
+            position: absolute;
+            width: 100%;
+            height: 90%;
+            transition: 0.4s ease-out;
+            -webkit-transition: 0.4s ease-out;
+        }
+    </style>
+</head>
+
+<body>
+    <input type="file" id='file'>
+    <br>
+    <br>
+    <img src="" id="test2" alt="">
+    <script>
+        $("#file").on('change', change);
+    </script>
+    <div class="imgGroup">
+    </div>
+    <div class="showImg">
+        <img src="" id="test" alt="">
+    </div>
+    <script>
+        $(".imgGroup").on('click', function() {
+            $('.showImg').animate({
+                'width': '320px',
+                'height': '768px'
+            }, 400);
+        });
+        var TimeFn = null;
+        $(".showImg").on('click', 'img', function() {
+            // 取消上次延时未执行的方法
+            clearTimeout(TimeFn);
+            //执行延时
+            TimeFn = setTimeout(function() {
+                //do function在此处写单击事件要执行的代码
+                $(this).parent().animate({
+                    'width': '0',
+                    'height': '0'
+                }, 400);
+            }.bind(this), 300);
+        });
+        $(".showImg").on('dblclick', 'img', function() {
+            clearTimeout(TimeFn);
+            $(this).css({
+                'width': 'auto',
+                'height': 'auto'
+            });
+        });
+    </script>
+
+</body>
+
+</html>

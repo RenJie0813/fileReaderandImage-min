@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <!--联合服务端调用需引入StringView-->
+    <!--<script type="text/javascript" src="StringView.js"></script>-->
+    <script type="text/javascript" src="indexDB.js"></script>
+    <script type="text/javascript">
+        //indexDB.init();
+    </script>
+</head>
+
+<body onload="init()">
+    <input type="text" id="cid">
+    <input type="button" value="新增几条数据" onclick=" Tinsert(); "/>
+    <input type="button" value="查找一条记录" onclick=" Tselect(); "/>
+    <input type="button" value="删除一条记录" onclick=" Tdelete(); "/>
+    <input type="button" value="添加一条记录" onclick=" Tadd(); "/>
+    <input type="button" value="更新一条记录" onclick=" Tupdate(); "/>
+    <input type="button" value="清除所有表数据" onclick=" Tclear(); "/>
+    <script type="text/javascript">
+        var cid=document.getElementById("cid");
+        function init() {
+            var dbParams = new Object();
+            dbParams.db_name = "myDB";
+            dbParams.db_version = "1";
+            dbParams.db_store_name = "Test";
+            dbObject.init(dbParams);
+        }
+
+        function Tinsert() {
+            // 填入初始值
+            dbObject.put({ title: "Quarry Memories", author: "Fred", isbn: 123456 ,cid:1});
+            dbObject.put({ title: "Water Buffaloes", author: "Fred", isbn: 234567 ,cid:3});
+            dbObject.put({ title: "Bedrock Nights", author: "Barney", isbn: 345678 ,cid:5});
+        }
+
+        function Tselect() {
+            dbObject.select(parseInt(cid.value));
+        }
+
+        function Tadd() {
+            dbObject.put({ title: "Quarry wu", author: "lex", isbn: 123456,cid:2 });
+        }
+
+        function Tdelete() {
+            dbObject.delete(parseInt(cid.value));
+        }
+
+        function Tclear() {
+            dbObject.clear();
+        }
+
+        function Tupdate() {
+            dbObject.update(parseInt(cid.value),{ title: "DDDD wu", author: "lex", isbn: 123456 });
+        }
+    </script>
+
+    <hr>
+    <h3>通知器：输入a,aa,aaa检测不同结果</h3>
+    <hr/>
+    <input type="text" name="txt" id="txt" value="">
+    <button type="button" name="button" id="btn">Go Check!</button>
+
+
+    <script type="text/javascript" src="Notification.js"></script>
+    <script>
+        var obj = {
+            out: function(str, str2) {
+                console.log('this is out!', str, str2);
+            },
+            set: function() {
+                alert('set');
+            },
+            Register: function(str, str2) {
+                // 第一个参数为注册的事件名，第二个参数为post发送的参数
+                console.log(str, str2);
+            }
+        };
+
+        // Register
+        NotificationCenter.addObserver(obj, 'Register', 'test1');
+        NotificationCenter.addObserver(obj, 'out', 'test2');
+        NotificationCenter.addObserver(obj, 'set', 'test3');
+
+        btn.onclick = function() {
+            var chose = txt.value;
+            var arr = [1, 2, 3];
+            switch (chose) {
+                case 'a':
+                    NotificationCenter.postNotification('test1', arr);
+                    break;
+                case 'aa':
+                    NotificationCenter.postNotification('test2', 'Success!');
+                    break;
+                case 'aaa':
+                    NotificationCenter.postNotification('test3', 'Success!');
+            }
+        }
+    </script>
+    <!--
+    // ts
+    class $Tool{
+        static  client:Client;
+
+        static msgLib:{ [key:string]:any[]} = {};
+
+
+        static sendMessage(method:string,arg?: any[]){
+            var sendList = $Tool.msgLib[method];
+
+            if(!sendList){
+                return;
+            }
+
+            for(var key in sendList){
+                sendList[key]["fnc"].apply(sendList[key]["owner"],arg);
+            }
+        }
+
+
+        static linkMessage(method:string,fnction:Function,own:any){
+            if(!$Tool.msgLib[method]){
+                $Tool.msgLib[method] = [];
+            }
+            $Tool.msgLib[method][$Tool.msgLib[method].length]={fnc:fnction,owner:own};
+        }
+    }
+
+    //js
+    var $Tool = (function () {
+        function $Tool() {
+        }
+        $Tool.sendMessage = function (method, arg) {
+            var sendList = $Tool.msgLib[method];
+            if (!sendList) {
+                return;
+            }
+            for (var key in sendList) {
+                sendList[key]["fnc"].apply(sendList[key]["owner"], arg);
+            }
+        };
+        $Tool.linkMessage = function (method, fnction, own) {
+            if (!$Tool.msgLib[method]) {
+                $Tool.msgLib[method] = [];
+            }
+            $Tool.msgLib[method][$Tool.msgLib[method].length] = { fnc: fnction, owner: own };
+        };
+        return $Tool;
+    })();
+    $Tool.msgLib = {};
+    $Tool.MsgList = [];
+
+    //举个例子
+        $Tool.linkMessage("login", game.menuEvent, game);
+        $Tool.sendMessage("login");
+
+    -->
+    <script>
+        var eventManger = {
+            cached: {},
+            handlers: {},
+            //类型,绑定事件
+            addHandler: function (type, handler) {
+                if (typeof handler !== "function") return;
+
+                if (typeof this.handlers[type] == "undefined") {
+                    this.handlers[type] = [];
+                }
+                this.handlers[type].push(handler);
+
+                if (this.cached[type] instanceof Array) {
+                    //说明有缓存的 可以执行
+                    handler.apply(null, this.cached[type]);
+                }
+            },
+            removeHandler: function (type, handler) {
+                var events = this.handlers[type];
+                for (var i = 0, len = events.length; i < len; i++) {
+                    if (events[i] == handler) {
+                        events.splice(i, 1);
+                        break;
+                    }
+                }
+            },
+            trigger: function (type) {
+                //如果有订阅的事件，这个时候就触发了
+                if (this.handlers[type] instanceof Array) {
+                    var handlers = this.handlers[type];
+                    var args = Array.prototype.slice.call(arguments, 1);
+                    for (var i = 0, len = handlers.length; i < len; i++) {
+                        handlers[i].apply(null, args);
+                    }
+                }
+                //默认缓存
+                this.cached[type] = Array.prototype.slice.call(arguments, 1);
+            }
+        };
+    </script>
+
+</body>
+
+</html>
